@@ -1,0 +1,45 @@
+BUTTONS: SEM SHOULD DO SOME OF THE HEAVY LIFTING, NOT IR
+BUTTONS: Ir: port to using BSTR
+USE VTABLES (SEM, IR) instead of hard coding property setters.
+
+ALL BUTTONS, NOT JUST ONE
+  numbering of IR gened code
+  instead of main (head)... i dunno, something clever with uuagc to
+    flatten the nested stuff
+
+FIXME: Sem: type of Add
+FIXME: Ir: type of SAdd, SIdentExpr
+
+controls
+  create all controls, not just the first button
+  add to symbol table
+  properties:
+    vtable support (so we're not hard coding each property in the frm header)
+    propset on a default property, from code not frm header
+    propget on a named property (e.g. .Caption), from code not frm header
+  label
+  events
+    form_load
+    button_click (with control index)
+  form
+    background colour
+    scalewidth support
+generic method for settings properties of each of the buttons (vtable and api spec for libvbgui?)
+data types:
+  boolean: logical And
+  double: operators */+-
+  integer
+  string: as variant, Operator &
+  variant
+  arrays: accessing control array items by index
+libvbstd: Format, Left, Instr, MsgBox with buttons and caption
+statements:
+  if
+  select case
+
+
+
+
+
+
+
