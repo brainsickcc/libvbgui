@@ -106,9 +106,13 @@ typedef struct IForm
 
 typedef struct IFormVtbl
 {
-  HRESULT (__stdcall* Load)(IForm* self);
-  HRESULT (__stdcall* Show)(IForm* self);
-  HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, IButton* ret);
+  /* HRESULT (__stdcall* Load)(IForm* self); */
+  /* HRESULT (__stdcall* Show)(IForm* self); */
+  /* HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, IButton* ret); */
+  void (__stdcall* Load)(IForm* self);
+  void (__stdcall* Show)(IForm* self);
+  IButton* (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container);
+
 } IFormVtbl;
 
 typedef struct Form
@@ -169,7 +173,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
   return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
 
-HRESULT __stdcall Form_Load(IForm* iface)
+//HRESULT
+void
+__stdcall Form_Load(IForm* iface)
 {
   printf("lib: Form_Load: %i\n", FORMCOUNT);
   initHinstance();
@@ -204,9 +210,6 @@ HRESULT __stdcall Form_Load(IForm* iface)
 			   CW_USEDEFAULT, CW_USEDEFAULT,
 			   NULL, NULL, hInstance, NULL);
 
-
-
-  
 /* MSDN says: It is not recommended that you employ [GetStockObject] to obtain the current font used by dialogs and windows. Instead, use the SystemParametersInfo function with the SPI_GETNONCLIENTMETRICS parameter to retrieve the current font. SystemParametersInfo will take into account the current theme and provides font information for captions, menus, and message dialogs.  */
 
 // Should we ever clean up the font?
@@ -221,7 +224,7 @@ HRESULT __stdcall Form_Load(IForm* iface)
    SendMessageW( hwnd, WM_SETFONT, (WPARAM)self->hUserFont, 0 );
 
   self->hwnd = hwnd;
-  return S_OK;
+  // return S_OK;
 }
 
 static HWND formgethwndorload(Form* self)
@@ -232,7 +235,9 @@ static HWND formgethwndorload(Form* self)
   return self->hwnd;
 }
 
-HRESULT __stdcall Form_Show(IForm* iface)
+//HRESULT
+void
+__stdcall Form_Show(IForm* iface)
 {
   printf("lib: form_show\n");
   Form* self = impl_from_IForm(iface);
@@ -242,7 +247,7 @@ HRESULT __stdcall Form_Show(IForm* iface)
   ShowWindow(hwnd, SW_SHOW);
   UpdateWindow(hwnd);
   printf("lib: form_show: done\n");
-  return S_OK;
+  //return S_OK;
 }
 
 
@@ -278,7 +283,8 @@ static HWND __stdcall AddButton(IForm* iform)
   return hwnd;
 }
 
-HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, IButton* ret)
+//HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, IButton* ret)
+IButton* __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container)
 {
   Form* form = impl_from_IForm(self);
   HWND buttonHandle = AddButton(self);
@@ -286,9 +292,10 @@ HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIA
   Button* b = (Button*)malloc(sizeof(Button));
   b->IButton_iface.lpVtbl = &button_vtbl;
   b->hwnd = buttonHandle;
-  ret = &(b->IButton_iface);
 
-  return S_OK;
+  //ret = &(b->IButton_iface);
+  //return S_OK;
+  return &b->IButton_iface;
 }
 
 static const IFormVtbl form_vtbl =
