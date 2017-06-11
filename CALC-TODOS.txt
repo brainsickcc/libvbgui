@@ -37,9 +37,6 @@ statements:
   if
   select case
 
+msgbox: wrong number of params (changed the example file)
 
-
-
-
-
-
+Dim and methods: need to be class level, not global
