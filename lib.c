@@ -106,12 +106,9 @@ typedef struct IForm
 
 typedef struct IFormVtbl
 {
-  /* HRESULT (__stdcall* Load)(IForm* self); */
-  /* HRESULT (__stdcall* Show)(IForm* self); */
-  /* HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret); */
-  void (__stdcall* Load)(IForm* self);
-  void (__stdcall* Show)(IForm* self);
-  VARIANT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container);
+  HRESULT (__stdcall* Load)(IForm* self);
+  HRESULT (__stdcall* Show)(IForm* self);
+  HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret);
 
 } IFormVtbl;
 
@@ -173,8 +170,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
   return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
 
-//HRESULT
-void
+HRESULT
 __stdcall Form_Load(IForm* iface)
 {
   printf("lib: Form_Load: %i\n", FORMCOUNT);
@@ -224,7 +220,7 @@ __stdcall Form_Load(IForm* iface)
    SendMessageW( hwnd, WM_SETFONT, (WPARAM)self->hUserFont, 0 );
 
   self->hwnd = hwnd;
-  // return S_OK;
+  return S_OK;
 }
 
 static HWND formgethwndorload(Form* self)
@@ -235,8 +231,7 @@ static HWND formgethwndorload(Form* self)
   return self->hwnd;
 }
 
-//HRESULT
-void
+HRESULT
 __stdcall Form_Show(IForm* iface)
 {
   printf("lib: form_show\n");
@@ -247,7 +242,7 @@ __stdcall Form_Show(IForm* iface)
   ShowWindow(hwnd, SW_SHOW);
   UpdateWindow(hwnd);
   printf("lib: form_show: done\n");
-  //return S_OK;
+  return S_OK;
 }
 
 
@@ -287,19 +282,17 @@ IButton* __stdcall AddButton(IForm* iform)
   return &b->IButton_iface;
 }
 
-//HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret)
-VARIANT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container)
+HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret)
 {
   Form* form = impl_from_IForm(self);
 
   IButton* button = AddButton(self);
 
-  /* *ret = { VT_UNKNOWN }; */
-  /* ret->punkVal = (IUnknown*)button; */
+  ret->vt = VT_UNKNOWN;
+  ret->punkVal = (IUnknown*)button;
   // FIXME: IButton_iface is not IUnknown!
-  VARIANT ret = { VT_UNKNOWN };
-  ret.punkVal = (IUnknown*)button;
-  return ret;
+
+  return S_OK;
 }
 
 static const IFormVtbl form_vtbl =
