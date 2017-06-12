@@ -260,7 +260,7 @@ __stdcall Form_Show(IForm* iface)
 /*   return &(f->IForm_iface); */
 /* } */
 
-HWND __stdcall AddButton(IForm* iform)
+IButton* __stdcall AddButton(IForm* iform)
 {
   printf("lib: addbutton\n");
   Form* form = impl_from_IForm(iform);
@@ -280,24 +280,25 @@ HWND __stdcall AddButton(IForm* iform)
 			   formhwnd, NULL, hInstance, NULL);
    SendMessageW( hwnd, WM_SETFONT, (WPARAM)form->hUserFont, 0 );
 
-  return hwnd;
+  Button* b = (Button*)malloc(sizeof(Button));
+  b->IButton_iface.lpVtbl = &button_vtbl;
+  b->hwnd = hwnd;
+
+  return &b->IButton_iface;
 }
 
 //HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret)
 VARIANT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container)
 {
   Form* form = impl_from_IForm(self);
-  HWND buttonHandle = AddButton(self);
 
-  Button* b = (Button*)malloc(sizeof(Button));
-  b->IButton_iface.lpVtbl = &button_vtbl;
-  b->hwnd = buttonHandle;
+  IButton* button = AddButton(self);
 
   /* *ret = { VT_UNKNOWN }; */
-  /* ret->punkVal = (IUnknown*)&b->IButton_iface; */
+  /* ret->punkVal = (IUnknown*)button; */
   // FIXME: IButton_iface is not IUnknown!
   VARIANT ret = { VT_UNKNOWN };
-  ret.punkVal = (IUnknown*)&b->IButton_iface;
+  ret.punkVal = (IUnknown*)button;
   return ret;
 }
 
