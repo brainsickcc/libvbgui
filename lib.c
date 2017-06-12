@@ -108,10 +108,10 @@ typedef struct IFormVtbl
 {
   /* HRESULT (__stdcall* Load)(IForm* self); */
   /* HRESULT (__stdcall* Show)(IForm* self); */
-  /* HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, IButton* ret); */
+  /* HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret); */
   void (__stdcall* Load)(IForm* self);
   void (__stdcall* Show)(IForm* self);
-  IButton* (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container);
+  VARIANT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container);
 
 } IFormVtbl;
 
@@ -283,8 +283,8 @@ HWND __stdcall AddButton(IForm* iform)
   return hwnd;
 }
 
-//HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, IButton* ret)
-IButton* __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container)
+//HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret)
+VARIANT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container)
 {
   Form* form = impl_from_IForm(self);
   HWND buttonHandle = AddButton(self);
@@ -293,9 +293,12 @@ IButton* __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARI
   b->IButton_iface.lpVtbl = &button_vtbl;
   b->hwnd = buttonHandle;
 
-  //ret = &(b->IButton_iface);
-  //return S_OK;
-  return &b->IButton_iface;
+  /* *ret = { VT_UNKNOWN }; */
+  /* ret->punkVal = (IUnknown*)&b->IButton_iface; */
+  // FIXME: IButton_iface is not IUnknown!
+  VARIANT ret = { VT_UNKNOWN };
+  ret.punkVal = (IUnknown*)&b->IButton_iface;
+  return ret;
 }
 
 static const IFormVtbl form_vtbl =
