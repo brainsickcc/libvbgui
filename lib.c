@@ -260,7 +260,7 @@ __stdcall Form_Show(IForm* iface)
 /*   return &(f->IForm_iface); */
 /* } */
 
-static HWND __stdcall AddButton(IForm* iform)
+HWND __stdcall AddButton(IForm* iform)
 {
   printf("lib: addbutton\n");
   Form* form = impl_from_IForm(iform);

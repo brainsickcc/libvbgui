@@ -1,11 +1,11 @@
-BUTTONS: SEM SHOULD DO SOME OF THE HEAVY LIFTING, NOT IR
-BUTTONS: Ir: port to using BSTR
-USE VTABLES (SEM, IR) instead of hard coding property setters.
-
 ALL BUTTONS, NOT JUST ONE
-  numbering of IR gened code
-  instead of main (head)... i dunno, something clever with uuagc to
-    flatten the nested stuff
+  addonebuttonandsetcaptionetc - move this into uuagc native code
+    so can map for each button, not just the head
+  will need uniquer numbering of IR gened code
+VTABLE: SEM TO WORK OUT INDEX; IR TO DO SIMPLE LOOKUP
+  instead of buttondeterminewidth, buttonsetwidth etc
+
+BUTTONS: Ir: port to using BSTR
 
 FIXME: Sem: type of Add
 FIXME: Ir: type of SAdd, SIdentExpr
