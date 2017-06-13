@@ -33,6 +33,6 @@ statements:
   select case (Ir)
 Dim and methods: need to be instance level, not globals
   i.e. add Me pointer
-MsgBFIXME: msgbox: wrong number of params (changed the example file)
+
 
 

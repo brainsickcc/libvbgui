@@ -10,8 +10,8 @@ typedef struct IButton
 typedef struct IButtonVtbl
 {
   HRESULT (__stdcall* SetCaption)(IButton* self, BSTR caption);
-  HRESULT (__stdcall* SetWidth)(IButton* self, float width);
-  HRESULT (__stdcall* SetHeight)(IButton* self, float height);
+  HRESULT (__stdcall* SetWidth)(IButton* self, double width); // TODO: check: single or double?
+  HRESULT (__stdcall* SetHeight)(IButton* self, double height);
 } IButtonVtbl;
 
 typedef struct Button
@@ -50,7 +50,7 @@ HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
   return S_OK;
 }
 
-HRESULT __stdcall Button_SetWidth(IButton* iface, float width)
+HRESULT __stdcall Button_SetWidth(IButton* iface, double width)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
   RECT r;
@@ -59,7 +59,7 @@ HRESULT __stdcall Button_SetWidth(IButton* iface, float width)
   return S_OK;
 }
 
-HRESULT __stdcall Button_SetHeight(IButton* iface, float height)
+HRESULT __stdcall Button_SetHeight(IButton* iface, double height)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
 
