@@ -10,6 +10,8 @@ typedef struct IButton
 typedef struct IButtonVtbl
 {
   HRESULT (__stdcall* SetCaption)(IButton* self, BSTR caption);
+  HRESULT (__stdcall* SetTop)(IButton* self, double top);
+  HRESULT (__stdcall* SetLeft)(IButton* self, double left);
   HRESULT (__stdcall* SetWidth)(IButton* self, double width); // TODO: check: single or double?
   HRESULT (__stdcall* SetHeight)(IButton* self, double height);
 } IButtonVtbl;
@@ -50,6 +52,26 @@ HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
   return S_OK;
 }
 
+HRESULT __stdcall Button_SetTop(IButton* iface, double top)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+
+  RECT r;
+  GetWindowRect(hwnd, &r);
+  SetWindowPos(hwnd, NULL, r.left, top / 15, r.right - r.left, r.bottom - r.top, 0);
+  return S_OK;
+}
+
+HRESULT __stdcall Button_SetLeft(IButton* iface, double left)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+
+  RECT r;
+  GetWindowRect(hwnd, &r);
+  SetWindowPos(hwnd, NULL, left / 15, r.top, r.right - r.left, r.bottom - r.top, 0);
+  return S_OK;
+}
+
 HRESULT __stdcall Button_SetWidth(IButton* iface, double width)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
@@ -72,6 +94,8 @@ HRESULT __stdcall Button_SetHeight(IButton* iface, double height)
 static const IButtonVtbl button_vtbl =
 {
   Button_SetCaption,
+  Button_SetTop,
+  Button_SetLeft,
   Button_SetWidth,
   Button_SetHeight,
 };

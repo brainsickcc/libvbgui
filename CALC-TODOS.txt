@@ -1,6 +1,5 @@
-Buttons: VTABLE: use to set properties, in header
-
 controls
+  set string properties e.g. caption in header
   add created controls to symbol table
   properties:
     propset on a default property, from code not frm header
@@ -14,6 +13,9 @@ controls
     background colour
     scalewidth, scaleheight support
 data types:
+  coercion:
+    move into the ast, so the work of Sem is put to good use?  do other compilers do this?
+    actually implement.  right now we can only coerce something into itself
   identExpr: fix type in IR.  Actually, probably Sem should provide that
   boolean: logical And (Sem; Ir)
   double: operators */+-
