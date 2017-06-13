@@ -1,42 +1,38 @@
-ALL BUTTONS, NOT JUST ONE
-  addonebuttonandsetcaptionetc - move this into uuagc native code
-    so can map for each button, not just the head
-  will need uniquer numbering of IR gened code
-VTABLE: SEM TO WORK OUT INDEX; IR TO DO SIMPLE LOOKUP
-  instead of buttondeterminewidth, buttonsetwidth etc
-
-BUTTONS: Ir: port to using BSTR
-
-FIXME: Sem: type of Add
-FIXME: Ir: type of SAdd, SIdentExpr
+Buttons: VTABLE: use to set properties, in header
 
 controls
-  create all controls, not just the first button
-  add to symbol table
+  add created controls to symbol table
   properties:
-    vtable support (so we're not hard coding each property in the frm header)
     propset on a default property, from code not frm header
     propget on a named property (e.g. .Caption), from code not frm header
   label
+  textbox
   events
     form_load
     button_click (with control index)
   form
     background colour
-    scalewidth support
-generic method for settings properties of each of the buttons (vtable and api spec for libvbgui?)
+    scalewidth, scaleheight support
 data types:
-  boolean: logical And
+  identExpr: fix type in IR.  Actually, probably Sem should provide that
+  boolean: logical And (Sem; Ir)
   double: operators */+-
   integer
-  string: as variant, Operator &
+  string: convert to BSTR, variant string support, Operator &
   variant
   arrays: accessing control array items by index
-libvbstd: Format, Left, Instr, MsgBox with buttons and caption
+libvbstd:
+  Format
+  Left
+  Instr
+  MsgBox with variants and buttons and caption
 statements:
-  if
-  select case
+  call: support casting msgbox message string/buttons int to variant
+  call: support Missing parameters (remove Sem validation; IR)
+  if (Ir)
+  select case (Ir)
+Dim and methods: need to be instance level, not globals
+  i.e. add Me pointer
+MsgBFIXME: msgbox: wrong number of params (changed the example file)
 
-msgbox: wrong number of params (changed the example file)
 
-Dim and methods: need to be class level, not global
