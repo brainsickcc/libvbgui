@@ -33,6 +33,40 @@ impl_from_IButton(IButton *iface)
 }
 
 
+struct ILabelVtbl;
+typedef struct ILabel
+{
+  const struct ILabelVtbl *lpVtbl;
+} ILabel;
+
+typedef struct ILabelVtbl
+{
+  HRESULT (__stdcall* SetCaption)(ILabel* self, BSTR caption);
+  HRESULT (__stdcall* SetTop)(ILabel* self, double top);
+  HRESULT (__stdcall* SetLeft)(ILabel* self, double left);
+  HRESULT (__stdcall* SetWidth)(ILabel* self, double width); // TODO: check: single or double?
+  HRESULT (__stdcall* SetHeight)(ILabel* self, double height);
+} ILabelVtbl;
+
+typedef struct Label
+{
+  ILabel ILabel_iface;
+
+  HWND hwnd;
+} Label;
+
+inline
+static
+Label*
+impl_from_ILabel(ILabel *iface)
+{
+  printf("lib: impl_from_ILabel\n");
+  return CONTAINING_RECORD(iface, Label, ILabel_iface);
+}
+
+
+
+
 
 
 typedef struct
@@ -138,6 +172,52 @@ static const IButtonVtbl button_vtbl =
   Button_SetWidth,
   Button_SetHeight,
 };
+
+
+
+HRESULT __stdcall Label_SetCaption(ILabel* iface, BSTR caption)
+{
+  HWND hwnd = impl_from_ILabel(iface)->hwnd;
+  return Control_SetCaption(hwnd, caption);
+}
+
+HRESULT __stdcall Label_SetTop(ILabel* iface, double top)
+{
+  HWND hwnd = impl_from_ILabel(iface)->hwnd;
+  return Control_SetTop(hwnd, top);
+}
+
+HRESULT __stdcall Label_SetLeft(ILabel* iface, double left)
+{
+  HWND hwnd = impl_from_ILabel(iface)->hwnd;
+  return Control_SetLeft(hwnd, left);
+}
+
+HRESULT __stdcall Label_SetWidth(ILabel* iface, double width)
+{
+  HWND hwnd = impl_from_ILabel(iface)->hwnd;
+  return Control_SetWidth(hwnd, width);
+}
+
+HRESULT __stdcall Label_SetHeight(ILabel* iface, double height)
+{
+  HWND hwnd = impl_from_ILabel(iface)->hwnd;
+  return Control_SetHeight(hwnd, height);
+}
+
+static const ILabelVtbl label_vtbl =
+{
+  Label_SetCaption,
+  Label_SetTop,
+  Label_SetLeft,
+  Label_SetWidth,
+  Label_SetHeight,
+};
+
+
+
+
+
 
 
 static int FORMCOUNT = 0;
@@ -343,6 +423,33 @@ IButton* __stdcall AddButton(IForm* iform)
   b->hwnd = hwnd;
 
   return &b->IButton_iface;
+}
+
+ILabel* __stdcall AddLabel(IForm* iform)
+{
+  printf("lib: addlabel\n");
+  Form* form = impl_from_IForm(iform);
+  printf("lib: addlabel: have impl\n");
+  HWND formhwnd = formgethwndorload(form);
+  printf("lib: addlabel: have hwnd\n");
+
+  int x = 0;
+  int y = 0;
+  int width = 100;
+  int height = 22;
+
+  HWND hwnd = CreateWindow("STATIC", "Label1",
+			   WS_CHILD | WS_VISIBLE,
+			   x, y,
+			   100, 22,
+			   formhwnd, NULL, hInstance, NULL);
+   SendMessageW( hwnd, WM_SETFONT, (WPARAM)form->hUserFont, 0 );
+
+  Label* b = (Label*)malloc(sizeof(Label));
+  b->ILabel_iface.lpVtbl = &label_vtbl;
+  b->hwnd = hwnd;
+
+  return &b->ILabel_iface;
 }
 
 HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret)

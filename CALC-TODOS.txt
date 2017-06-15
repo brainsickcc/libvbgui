@@ -5,7 +5,7 @@ controls
     propset on a default property, from code not frm header
     propget on a named property (e.g. .Caption), from code not frm header
   label
-  textbox
+    backcolor, forecolor
   events
     form_load
     button_click (with control index)
