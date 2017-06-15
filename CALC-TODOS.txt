@@ -9,6 +9,7 @@ controls
     button_click (with control index)
   form
     scalewidth, scaleheight support
+    caption
 data types:
   coercion:
     move into the ast, so the work of Sem is put to good use?  do other compilers do this?
