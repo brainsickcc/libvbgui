@@ -35,7 +35,28 @@ impl_from_IButton(IButton *iface)
 
 
 
+typedef struct
+{
+  int left, top, width, height;
+} SizedRect;
 
+SizedRect GetPos(HWND hwnd)
+{
+  RECT r1;
+  GetClientRect(hwnd, &r1);
+  int width = r1.right; // sic
+  int height = r1.bottom; // sic
+  POINT topleft;
+  topleft.x = r1.top;
+  topleft.y = r1.left;
+  MapWindowPoints(hwnd, GetParent(hwnd), &topleft, 1);
+  SizedRect r2;
+  r2.left = topleft.x;
+  r2.top = topleft.y;
+  r2.width = width;
+  r2.height = height;
+  return r2;
+}
 
 
 
@@ -55,39 +76,32 @@ HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
 HRESULT __stdcall Button_SetTop(IButton* iface, double top)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
-
-  RECT r;
-  GetWindowRect(hwnd, &r);
-  SetWindowPos(hwnd, NULL, r.left, top / 15, r.right - r.left, r.bottom - r.top, 0);
+  SizedRect r = GetPos(hwnd);
+  SetWindowPos(hwnd, NULL, r.left, top / 15, r.width, r.height, 0);
   return S_OK;
 }
 
 HRESULT __stdcall Button_SetLeft(IButton* iface, double left)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
-
-  RECT r;
-  GetWindowRect(hwnd, &r);
-  SetWindowPos(hwnd, NULL, left / 15, r.top, r.right - r.left, r.bottom - r.top, 0);
+  SizedRect r = GetPos(hwnd);
+  SetWindowPos(hwnd, NULL, left / 15, r.top, r.width, r.height, 0);
   return S_OK;
 }
 
 HRESULT __stdcall Button_SetWidth(IButton* iface, double width)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
-  RECT r;
-  GetWindowRect(hwnd, &r);
-  SetWindowPos(hwnd, NULL, r.left, r.top, width / 15, r.bottom - r.top, 0);
+  SizedRect r = GetPos(hwnd);
+  SetWindowPos(hwnd, NULL, r.left, r.top, width / 15, r.height, 0);
   return S_OK;
 }
 
 HRESULT __stdcall Button_SetHeight(IButton* iface, double height)
 {
   HWND hwnd = impl_from_IButton(iface)->hwnd;
-
-  RECT r;
-  GetWindowRect(hwnd, &r);
-  SetWindowPos(hwnd, NULL, r.left, r.top, r.right - r.left, height / 15, 0);
+  SizedRect r = GetPos(hwnd);
+  SetWindowPos(hwnd, NULL, r.left, r.top, r.width, height / 15, 0);
   return S_OK;
 }
 
