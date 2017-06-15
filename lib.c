@@ -46,6 +46,8 @@ typedef struct ILabelVtbl
   HRESULT (__stdcall* SetLeft)(ILabel* self, double left);
   HRESULT (__stdcall* SetWidth)(ILabel* self, double width); // TODO: check: single or double?
   HRESULT (__stdcall* SetHeight)(ILabel* self, double height);
+  HRESULT (__stdcall* SetForeColor)(ILabel* self, LONG x);
+  HRESULT (__stdcall* SetBackColor)(ILabel* self, LONG x);
 } ILabelVtbl;
 
 typedef struct Label
@@ -53,6 +55,9 @@ typedef struct Label
   ILabel ILabel_iface;
 
   HWND hwnd;
+  HBRUSH backBrush; // TODO: free on destroy
+  LONG back; // is there a better type for this?  what does RGB macro return? CreateSolidBrush take?
+  LONG foreground;
 } Label;
 
 inline
@@ -205,6 +210,21 @@ HRESULT __stdcall Label_SetHeight(ILabel* iface, double height)
   return Control_SetHeight(hwnd, height);
 }
 
+HRESULT __stdcall Label_SetForeColor(ILabel* iface, LONG x)
+{
+  Label* lbl = impl_from_ILabel(iface);
+  lbl->foreground = x;
+  return S_OK;
+}
+
+HRESULT __stdcall Label_SetBackColor(ILabel* iface, LONG x)
+{
+  Label* lbl = impl_from_ILabel(iface);
+  lbl->back = x;
+  lbl->backBrush = CreateSolidBrush(x);
+  return S_OK;
+}
+
 static const ILabelVtbl label_vtbl =
 {
   Label_SetCaption,
@@ -212,11 +232,9 @@ static const ILabelVtbl label_vtbl =
   Label_SetLeft,
   Label_SetWidth,
   Label_SetHeight,
+  Label_SetForeColor,
+  Label_SetBackColor,
 };
-
-
-
-
 
 
 
@@ -261,6 +279,7 @@ typedef struct Form
 
   HWND hwnd;
   HFONT hUserFont;
+  Label* lbl;
 } Form;
 
 inline
@@ -283,7 +302,17 @@ static void initHinstance()
 		     (LPCSTR)&initHinstance, &hInstance);
 }
 
+Form* formsingleton; // FIXME
+static Form* find_form(HWND hwnd)
+{
+  // FIXME.   Use thunking?  Window props?  A concurrent dict?
+  return formsingleton;
+}
+
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+
+  Form* self = find_form(hwnd);
+
   PAINTSTRUCT ps;
   HDC         hdc;
   /* printf("lib: wndproc\n"); */
@@ -307,6 +336,20 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
       	PostQuitMessage(0);
       return 0;
     }
+  case WM_CTLCOLORSTATIC:
+    {
+      // re all three uses of self->lbl:
+      // FIXME what if we haven't customized the colour?
+      // FIXME: this only supports one label (not more, not less!!!)
+
+      HDC hdcStatic = (HDC)wParam;
+      SetTextColor(hdcStatic, self->lbl->foreground);
+      // This sets the background of the text
+      SetBkColor(hdcStatic, self->lbl->back);
+
+      // This brush is needed for the background outwith the text.
+      return (INT_PTR)self->lbl->backBrush;
+    }
   }
 
 
@@ -320,6 +363,7 @@ __stdcall Form_Load(IForm* iface)
   initHinstance();
 
   Form* self = impl_from_IForm(iface);
+  formsingleton = self;
 
   MSG         msg;
   WNDCLASSEX  wndclass;
@@ -380,7 +424,7 @@ __stdcall Form_Show(IForm* iface)
   printf("lib: form_show\n");
   Form* self = impl_from_IForm(iface);
   printf("lib: form_show: have impl\n");
-  HWND hwnd = formgethwndorload(self);;
+  HWND hwnd = formgethwndorload(self);
   printf("lib: form_show: have hwnd\n");
   ShowWindow(hwnd, SW_SHOW);
   UpdateWindow(hwnd);
@@ -445,11 +489,12 @@ ILabel* __stdcall AddLabel(IForm* iform)
 			   formhwnd, NULL, hInstance, NULL);
    SendMessageW( hwnd, WM_SETFONT, (WPARAM)form->hUserFont, 0 );
 
-  Label* b = (Label*)malloc(sizeof(Label));
-  b->ILabel_iface.lpVtbl = &label_vtbl;
-  b->hwnd = hwnd;
+  Label* l = (Label*)malloc(sizeof(Label));
+  l->ILabel_iface.lpVtbl = &label_vtbl;
+  l->hwnd = hwnd;
+  form->lbl = l;
 
-  return &b->ILabel_iface;
+  return &l->ILabel_iface;
 }
 
 HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret)

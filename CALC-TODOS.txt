@@ -4,13 +4,10 @@ controls
   properties:
     propset on a default property, from code not frm header
     propget on a named property (e.g. .Caption), from code not frm header
-  label
-    backcolor, forecolor
   events
     form_load
     button_click (with control index)
   form
-    background colour
     scalewidth, scaleheight support
 data types:
   coercion:
