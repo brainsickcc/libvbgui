@@ -32,6 +32,5 @@ statements:
   select case (Ir)
 Dim and methods: need to be instance level, not globals
   i.e. add Me pointer
-
-
-
+resources
+  exe icon
