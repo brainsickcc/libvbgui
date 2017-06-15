@@ -58,12 +58,8 @@ SizedRect GetPos(HWND hwnd)
   return r2;
 }
 
-
-
-HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
+HRESULT __stdcall Control_SetCaption(HWND hwnd, BSTR caption)
 {
-  HWND hwnd = impl_from_IButton(iface)->hwnd;
-
   /* VARIANT captionV = { VT_EMPTY }; */
   /* // FIXME: error handling, memory management, etc. */
   /* if (VariantChangeType(&captionV, value, 0, VT_BSTR) != S_OK) */
@@ -73,36 +69,65 @@ HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
   return S_OK;
 }
 
-HRESULT __stdcall Button_SetTop(IButton* iface, double top)
+HRESULT __stdcall Control_SetTop(HWND hwnd, double top)
 {
-  HWND hwnd = impl_from_IButton(iface)->hwnd;
   SizedRect r = GetPos(hwnd);
   SetWindowPos(hwnd, NULL, r.left, top / 15, r.width, r.height, 0);
   return S_OK;
 }
 
-HRESULT __stdcall Button_SetLeft(IButton* iface, double left)
+HRESULT __stdcall Control_SetLeft(HWND hwnd, double left)
 {
-  HWND hwnd = impl_from_IButton(iface)->hwnd;
   SizedRect r = GetPos(hwnd);
   SetWindowPos(hwnd, NULL, left / 15, r.top, r.width, r.height, 0);
   return S_OK;
 }
 
-HRESULT __stdcall Button_SetWidth(IButton* iface, double width)
+HRESULT __stdcall Control_SetWidth(HWND hwnd, double width)
 {
-  HWND hwnd = impl_from_IButton(iface)->hwnd;
   SizedRect r = GetPos(hwnd);
   SetWindowPos(hwnd, NULL, r.left, r.top, width / 15, r.height, 0);
   return S_OK;
 }
 
-HRESULT __stdcall Button_SetHeight(IButton* iface, double height)
+HRESULT __stdcall Control_SetHeight(HWND hwnd, double height)
 {
-  HWND hwnd = impl_from_IButton(iface)->hwnd;
   SizedRect r = GetPos(hwnd);
   SetWindowPos(hwnd, NULL, r.left, r.top, r.width, height / 15, 0);
   return S_OK;
+}
+
+
+
+
+HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+  return Control_SetCaption(hwnd, caption);
+}
+
+HRESULT __stdcall Button_SetTop(IButton* iface, double top)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+  return Control_SetTop(hwnd, top);
+}
+
+HRESULT __stdcall Button_SetLeft(IButton* iface, double left)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+  return Control_SetLeft(hwnd, left);
+}
+
+HRESULT __stdcall Button_SetWidth(IButton* iface, double width)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+  return Control_SetWidth(hwnd, width);
+}
+
+HRESULT __stdcall Button_SetHeight(IButton* iface, double height)
+{
+  HWND hwnd = impl_from_IButton(iface)->hwnd;
+  return Control_SetHeight(hwnd, height);
 }
 
 static const IButtonVtbl button_vtbl =
