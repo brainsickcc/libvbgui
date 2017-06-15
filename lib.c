@@ -349,6 +349,7 @@ HRESULT __stdcall Form_ControlsDotAdd(IForm* self, BSTR progId, BSTR name, VARIA
 {
   Form* form = impl_from_IForm(self);
 
+  // FIXME: need to look at progid (e.g. compare to VB.CommandButton)
   IButton* button = AddButton(self);
 
   ret->vt = VT_UNKNOWN;
