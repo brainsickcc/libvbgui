@@ -22,7 +22,7 @@ data types:
   variant
   arrays: accessing control array items by index
 libvbstd:
-  Format
+  Format - always called with 0 as first param, then second param is "." or "0." or "-0."
   Left
   Instr
   MsgBox with variants and buttons and caption
