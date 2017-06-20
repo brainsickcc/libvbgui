@@ -269,8 +269,9 @@ typedef struct IFormVtbl
 {
   HRESULT (__stdcall* Load)(IForm* self);
   HRESULT (__stdcall* Show)(IForm* self);
+  HRESULT (__stdcall* SetScaleWidth)(IForm* self, double width);
+  HRESULT (__stdcall* SetScaleHeight)(IForm* self, double height);
   HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret);
-
 } IFormVtbl;
 
 typedef struct Form
@@ -432,6 +433,24 @@ __stdcall Form_Show(IForm* iface)
   return S_OK;
 }
 
+HRESULT __stdcall Form_SetScaleWidth(IForm* iface, double width)
+{
+  printf("FORM SET SCALE WIDTH\n");
+  HWND hwnd = impl_from_IForm(iface)->hwnd;
+  // FIXME want scalewidth not width
+  // use AdjustWindowRect.
+  return Control_SetWidth(hwnd, width);
+}
+
+HRESULT __stdcall Form_SetScaleHeight(IForm* iface, double height)
+{
+  printf("FORM SET SCALE HEIGHT\n");
+  HWND hwnd = impl_from_IForm(iface)->hwnd;
+  // FIXME want scaleheight not height
+  return Control_SetHeight(hwnd, height);
+}
+
+
 
 /* IForm* __stdcall new_form(void) */
 /* { */
@@ -515,5 +534,7 @@ static const IFormVtbl form_vtbl =
 {
   Form_Load,
   Form_Show,
-  Form_ControlsDotAdd
+  Form_SetScaleWidth,
+  Form_SetScaleHeight,
+  Form_ControlsDotAdd,
 };
