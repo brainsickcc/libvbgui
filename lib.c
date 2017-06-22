@@ -269,8 +269,8 @@ typedef struct IFormVtbl
 {
   HRESULT (__stdcall* Load)(IForm* self);
   HRESULT (__stdcall* Show)(IForm* self);
-  HRESULT (__stdcall* SetScaleWidth)(IForm* self, double width);
-  HRESULT (__stdcall* SetScaleHeight)(IForm* self, double height);
+  HRESULT (__stdcall* SetScaleWidth)(IForm* self, double scalewidth);
+  HRESULT (__stdcall* SetScaleHeight)(IForm* self, double scaleheight);
   HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret);
 } IFormVtbl;
 
@@ -390,8 +390,8 @@ __stdcall Form_Load(IForm* iface)
 
   HWND hwnd = CreateWindow(classname, "Form1",
 			   WS_OVERLAPPEDWINDOW,
-			   CW_USEDEFAULT, CW_USEDEFAULT,
-			   CW_USEDEFAULT, CW_USEDEFAULT,
+			   200, 200, // was CW_USEDEFAULT
+			   900, 900, // was CW_USEDEFAULT
 			   NULL, NULL, hInstance, NULL);
 
 /* MSDN says: It is not recommended that you employ [GetStockObject] to obtain the current font used by dialogs and windows. Instead, use the SystemParametersInfo function with the SPI_GETNONCLIENTMETRICS parameter to retrieve the current font. SystemParametersInfo will take into account the current theme and provides font information for captions, menus, and message dialogs.  */
@@ -433,21 +433,70 @@ __stdcall Form_Show(IForm* iface)
   return S_OK;
 }
 
-HRESULT __stdcall Form_SetScaleWidth(IForm* iface, double width)
+HRESULT __stdcall Form_SetScaleWidth(IForm* iface, double scalewidth)
 {
-  printf("FORM SET SCALE WIDTH\n");
-  HWND hwnd = impl_from_IForm(iface)->hwnd;
-  // FIXME want scalewidth not width
-  // use AdjustWindowRect.
-  return Control_SetWidth(hwnd, width);
+  Form* self = impl_from_IForm(iface);
+  HWND hwnd = formgethwndorload(self);
+
+  RECT clientdelta;
+  clientdelta.left = 0;
+  clientdelta.top = 0;
+  clientdelta.right = 0;
+  clientdelta.bottom = 0;
+  AdjustWindowRect(&clientdelta, WS_OVERLAPPEDWINDOW, FALSE); // FALSE means no menu.
+
+  RECT current;
+  GetWindowRect(hwnd, &current);
+  // i.e. unadjustwindowrect:
+  current.left -= clientdelta.left;
+  current.top -= clientdelta.top;
+  current.right -= clientdelta.right;
+  current.bottom -= clientdelta.bottom;
+
+  RECT nu;
+  nu.left = current.left;
+  nu.top = current.top;
+  nu.right = current.left + scalewidth / 15;
+  nu.bottom = current.bottom;
+
+  // or could do += clientdelta
+  AdjustWindowRect(&nu, WS_OVERLAPPEDWINDOW, FALSE); // FALSE means no menu.
+  
+  SetWindowPos(hwnd, NULL, nu.left, nu.top, nu.right - nu.left, nu.bottom - nu.top, 0);
+  return S_OK;
 }
 
-HRESULT __stdcall Form_SetScaleHeight(IForm* iface, double height)
+HRESULT __stdcall Form_SetScaleHeight(IForm* iface, double scaleheight)
 {
-  printf("FORM SET SCALE HEIGHT\n");
-  HWND hwnd = impl_from_IForm(iface)->hwnd;
-  // FIXME want scaleheight not height
-  return Control_SetHeight(hwnd, height);
+  Form* self = impl_from_IForm(iface);
+  HWND hwnd = formgethwndorload(self);
+
+  RECT clientdelta;
+  clientdelta.left = 0;
+  clientdelta.top = 0;
+  clientdelta.right = 0;
+  clientdelta.bottom = 0;
+  AdjustWindowRect(&clientdelta, WS_OVERLAPPEDWINDOW, FALSE); // FALSE means no menu.
+
+  RECT current;
+  GetWindowRect(hwnd, &current);
+  // i.e. unadjustwindowrect:
+  current.left -= clientdelta.left;
+  current.top -= clientdelta.top;
+  current.right -= clientdelta.right;
+  current.bottom -= clientdelta.bottom;
+
+  RECT nu;
+  nu.left = current.left;
+  nu.top = current.top;
+  nu.right = current.right;
+  nu.bottom = current.top + scaleheight / 15;
+
+  // or could do += clientdelta
+  AdjustWindowRect(&nu, WS_OVERLAPPEDWINDOW, FALSE); // FALSE means no menu.
+
+  SetWindowPos(hwnd, NULL, nu.left, nu.top, nu.right - nu.left, nu.bottom - nu.top, 0);
+  return S_OK;
 }
 
 
