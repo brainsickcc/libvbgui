@@ -1,5 +1,4 @@
 controls
-  set string properties e.g. caption in header
   add created controls to symbol table
   properties:
     propset on a default property, from code not frm header
@@ -7,9 +6,6 @@ controls
   events
     form_load
     button_click (with control index)
-  form
-    scalewidth, scaleheight support
-    caption
 data types:
   coercion:
     move into the ast, so the work of Sem is put to good use?  do other compilers do this?
@@ -18,7 +14,7 @@ data types:
   boolean: logical And (Sem; Ir)
   double: operators */+-
   integer
-  string: convert to BSTR, variant string support, Operator &
+  string: convert to BSTR (even when not variant); operand &
   variant
   arrays: accessing control array items by index
 libvbstd:
@@ -27,7 +23,7 @@ libvbstd:
   Instr
   MsgBox with variants and buttons and caption
 statements:
-  call: support casting msgbox message string/buttons int to variant
+  call: support casting msgbox message buttons int to variant
   call: support Missing parameters (remove Sem validation; IR)
   if (Ir)
   select case (Ir)

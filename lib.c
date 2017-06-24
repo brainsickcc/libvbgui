@@ -28,7 +28,7 @@ static
 Button*
 impl_from_IButton(IButton *iface)
 {
-  printf("lib: impl_from_IButton\n");
+  //printf("lib: impl_from_IButton\n");
   return CONTAINING_RECORD(iface, Button, IButton_iface);
 }
 
@@ -65,7 +65,7 @@ static
 Label*
 impl_from_ILabel(ILabel *iface)
 {
-  printf("lib: impl_from_ILabel\n");
+  //printf("lib: impl_from_ILabel\n");
   return CONTAINING_RECORD(iface, Label, ILabel_iface);
 }
 
@@ -141,6 +141,7 @@ HRESULT __stdcall Control_SetHeight(HWND hwnd, double height)
 
 HRESULT __stdcall Button_SetCaption(IButton* iface, BSTR caption)
 {
+  printf("lib: Button_SetCaption\n");
   HWND hwnd = impl_from_IButton(iface)->hwnd;
   return Control_SetCaption(hwnd, caption);
 }
@@ -182,6 +183,7 @@ static const IButtonVtbl button_vtbl =
 
 HRESULT __stdcall Label_SetCaption(ILabel* iface, BSTR caption)
 {
+  printf("lib: Label_SetCaption\n");
   HWND hwnd = impl_from_ILabel(iface)->hwnd;
   return Control_SetCaption(hwnd, caption);
 }
@@ -242,7 +244,7 @@ static int FORMCOUNT = 0;
 
 void __stdcall pump(void)
 {
-  printf("lib: pump\n");
+  //printf("lib: pump\n");
   if (FORMCOUNT == 0)
     return;
 
@@ -271,6 +273,7 @@ typedef struct IFormVtbl
   HRESULT (__stdcall* Show)(IForm* self);
   HRESULT (__stdcall* SetScaleWidth)(IForm* self, double scalewidth);
   HRESULT (__stdcall* SetScaleHeight)(IForm* self, double scaleheight);
+  HRESULT (__stdcall* SetCaption)(IForm* self, BSTR caption);
   HRESULT (__stdcall* ControlsDotAdd)(IForm* self, BSTR progId, BSTR name, VARIANT container, VARIANT* ret);
 } IFormVtbl;
 
@@ -288,7 +291,7 @@ static
 Form*
 impl_from_IForm(IForm *iface)
 {
-  printf("lib: impl_from_IForm\n");
+  //printf("lib: impl_from_IForm\n");
   return CONTAINING_RECORD(iface, Form, IForm_iface);
 }
 
@@ -297,7 +300,7 @@ static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HMODULE hInstance;
 static void initHinstance()
 {
-  printf("lib: initHinstance\n");
+  //printf("lib: initHinstance\n");
   GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
 		     GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
 		     (LPCSTR)&initHinstance, &hInstance);
@@ -320,7 +323,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
   switch ( iMsg ) {
   case WM_NCCREATE:
     FORMCOUNT++; // or during load?  load happens sooner.
-    printf("NCCREATE: %i\n", FORMCOUNT);
+    //printf("NCCREATE: %i\n", FORMCOUNT);
     break;
   /* case WM_PAINT: */
   /*   hdc = BeginPaint(hwnd, &ps); */
@@ -332,7 +335,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
   case WM_DESTROY:
     {
       FORMCOUNT--;
-      printf("DESTROY: %i\n", FORMCOUNT);
+      //printf("DESTROY: %i\n", FORMCOUNT);
       if (FORMCOUNT == 0)
       	PostQuitMessage(0);
       return 0;
@@ -360,7 +363,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 HRESULT
 __stdcall Form_Load(IForm* iface)
 {
-  printf("lib: Form_Load: %i\n", FORMCOUNT);
+  //printf("lib: Form_Load: %i\n", FORMCOUNT);
   initHinstance();
 
   Form* self = impl_from_IForm(iface);
@@ -413,7 +416,7 @@ __stdcall Form_Load(IForm* iface)
 
 static HWND formgethwndorload(Form* self)
 {
-  printf("lib: gethwnd\n");
+  //printf("lib: gethwnd\n");
   if (self->hwnd == NULL)
     self->IForm_iface.lpVtbl->Load(&self->IForm_iface);
   return self->hwnd;
@@ -424,12 +427,12 @@ __stdcall Form_Show(IForm* iface)
 {
   printf("lib: form_show\n");
   Form* self = impl_from_IForm(iface);
-  printf("lib: form_show: have impl\n");
+  //printf("lib: form_show: have impl\n");
   HWND hwnd = formgethwndorload(self);
-  printf("lib: form_show: have hwnd\n");
+  //printf("lib: form_show: have hwnd\n");
   ShowWindow(hwnd, SW_SHOW);
   UpdateWindow(hwnd);
-  printf("lib: form_show: done\n");
+  //printf("lib: form_show: done\n");
   return S_OK;
 }
 
@@ -461,7 +464,7 @@ HRESULT __stdcall Form_SetScaleWidth(IForm* iface, double scalewidth)
 
   // or could do += clientdelta
   AdjustWindowRect(&nu, WS_OVERLAPPEDWINDOW, FALSE); // FALSE means no menu.
-  
+
   SetWindowPos(hwnd, NULL, nu.left, nu.top, nu.right - nu.left, nu.bottom - nu.top, 0);
   return S_OK;
 }
@@ -499,6 +502,15 @@ HRESULT __stdcall Form_SetScaleHeight(IForm* iface, double scaleheight)
   return S_OK;
 }
 
+HRESULT __stdcall Form_SetCaption(IForm* iface, BSTR caption)
+{
+  printf("lib: Form_SetCaption\n");
+  Form* self = impl_from_IForm(iface);
+  HWND hwnd = formgethwndorload(self);
+  SetWindowTextW(hwnd, caption);
+  return S_OK;
+}
+
 
 
 /* IForm* __stdcall new_form(void) */
@@ -512,11 +524,11 @@ HRESULT __stdcall Form_SetScaleHeight(IForm* iface, double scaleheight)
 
 IButton* __stdcall AddButton(IForm* iform)
 {
-  printf("lib: addbutton\n");
+  printf("lib: addbutton (woo)!!!!\n");
   Form* form = impl_from_IForm(iform);
-  printf("lib: addbutton: have impl\n");
+  //printf("lib: addbutton: have impl\n");
   HWND formhwnd = formgethwndorload(form);
-  printf("lib: addbutton: have hwnd\n");
+  //printf("lib: addbutton: have hwnd\n");
 
   int x = 0;
   int y = 0;
@@ -541,9 +553,9 @@ ILabel* __stdcall AddLabel(IForm* iform)
 {
   printf("lib: addlabel\n");
   Form* form = impl_from_IForm(iform);
-  printf("lib: addlabel: have impl\n");
+  //printf("lib: addlabel: have impl\n");
   HWND formhwnd = formgethwndorload(form);
-  printf("lib: addlabel: have hwnd\n");
+  //printf("lib: addlabel: have hwnd\n");
 
   int x = 0;
   int y = 0;
@@ -585,5 +597,6 @@ static const IFormVtbl form_vtbl =
   Form_Show,
   Form_SetScaleWidth,
   Form_SetScaleHeight,
+  Form_SetCaption,
   Form_ControlsDotAdd,
 };
